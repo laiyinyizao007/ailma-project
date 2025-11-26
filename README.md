@@ -1,152 +1,68 @@
-# AILMA - AI Life Management Assistant
+# AILMA - AI 智能生活管理助手
 
-**AI 智能生活管理助手**
-
-一款基于自然语言交互的智能生活管理中枢，通过 AI 驱动的任务解析和自动化执行，帮助用户高效管理跨平台的日程、笔记和数据总结。
+**用自然语言管理你的日历和笔记**
 
 ---
 
-## 🎯 核心特性
+## 🎯 这是什么？
 
-- ✅ **自然语言交互**: 用口语化指令完成所有操作
-- ✅ **Notion 作为前端**: 零 UI 开发，利用 Notion 强大的数据库能力
-- ✅ **Notion MCP 集成**: 使用 Model Context Protocol 实现标准化、高效的 Notion 集成
-- ✅ **Google Calendar MCP 集成**: 自然语言时间解析 + 自动生成 Meet 链接
-- ✅ **智能任务解析**: AI 自动识别意图，无需记忆复杂命令
-- ✅ **统一 MCP 架构**: Notion + Google Calendar 双 MCP 集成，零维护 OAuth
-- ✅ **自动化报告生成**: AI 驱动的数据分析和结构化报告
-- ✅ **Markdown 原生支持**: 报告和笔记使用 Markdown 格式，AI 友好
+在 **Notion** 中输入：
+```
+"明天下午3点和团队开会讨论Q1规划"
+```
+
+**AILMA 自动**：
+- ✅ 在 Google Calendar 创建事件
+- ✅ 在 Notion 生成会议纪要页面
+- ✅ 生成 Google Meet 链接
+- ✅ 10秒完成
 
 ---
 
-## 📖 快速导航
+## ⚡ 核心特性
 
-- **[项目状态报告](./STATUS.md)** 🆕 - 当前进度和下一步行动
-- **[产品需求文档 (PRD)](./docs/PRD.md)** - 完整的产品定义和功能需求
-- **[Notion MCP 架构设计](./docs/ARCHITECTURE-MCP.md)** ⭐ **推荐** - 使用 MCP 的现代化架构
-- **[Notion 连接测试](./tests/mcp_integration/QUICKSTART.md)** 🧪 - 测试 Notion 集成
-- **[项目结构说明](./docs/PROJECT-STRUCTURE.md)** - 代码组织和模块设计（旧方案参考）
-- **[开发指南](./docs/DEVELOPMENT.md)** - 环境搭建和开发流程（待创建）
-- **[API 文档](./docs/API.md)** - RESTful API 接口说明（待创建）
-- **[部署指南](./docs/DEPLOYMENT.md)** - 生产环境部署步骤（待创建）
+- **自然语言交互** - 不需要学习命令，用口语即可
+- **Notion 作为界面** - 零 UI 开发，利用 Notion 强大功能
+- **MCP 驱动集成** - Notion + Google Calendar 双 MCP
+- **AI 生成报告** - 自动生成周报、月报
+- **高度可扩展** - 模块化架构，易于添加新集成
 
 ---
 
-## 🚀 快速开始
+## 📖 文档导航
 
-### 前置要求
+### 🚀 快速开始（5分钟）
+1. [什么是 AILMA？](./docs/overview/what-is-ailma.md) - 产品介绍
+2. [快速开始指南](./docs/guides/quick-start.md) - 立即运行
+3. [用户使用指南](./docs/guides/user-guide.md) - 学习使用
 
-- Python 3.11+
-- Docker 24.0+
-- PostgreSQL 15+
-- Redis 7+
+### 📚 完整文档
+访问 **[文档总索引](./docs/INDEX.md)** 查找所有文档
 
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/your-org/ailma-project.git
-cd ailma-project
-```
-
-### 2. 配置环境变量
-
-```bash
-# 复制环境变量模板
-cp .env.example .env
-
-# 编辑 .env 文件，填写以下关键配置：
-# - ANTHROPIC_API_KEY (Claude API Key)
-# - NOTION_DEFAULT_TOKEN (Notion Integration Token)
-# - GOOGLE_CLIENT_ID 和 GOOGLE_CLIENT_SECRET
-nano .env
-```
-
-### 3. 启动服务
-
-```bash
-# 使用 Docker Compose 启动所有服务
-docker-compose up -d
-
-# 查看日志
-docker-compose logs -f backend
-```
-
-### 4. 访问应用
-
-- **API 文档**: http://localhost:8000/docs
-- **健康检查**: http://localhost:8000/health
-- **Notion 工作区**: 在您的 Notion 中使用预配置的数据库
+### 🔗 快速链接
+| 你想... | 访问 |
+|---------|------|
+| 了解产品 | [产品概览](./docs/overview/what-is-ailma.md) |
+| 运行项目 | [快速开始](./docs/guides/quick-start.md) |
+| 配置 Notion | [Notion MCP 配置](./docs/integrations/notion/mcp-setup.md) |
+| 配置 Google Calendar | [Google Calendar MCP 配置](./docs/integrations/google-calendar/mcp-setup.md) |
+| 理解架构 | [架构设计](./docs/overview/architecture.md) |
+| 部署上线 | [Docker 部署](./docs/deployment/docker.md) |
+| 解决问题 | [故障排查](./docs/reference/troubleshooting.md) |
 
 ---
 
-## 📋 使用示例
-
-### 在 Notion 中创建指令
-
-1. 打开您的 **AILMA 指令中心** 数据库
-2. 新增一行，输入指令：
+## 🏗️ 架构速览
 
 ```
-指令: 帮我把明天下午3点的团队会议加到日历
-状态: Pending
+Notion (前端)
+    ↓ MCP
+Backend (FastAPI + AI)
+    ↓ MCP
+Google Calendar + Notion (数据)
 ```
 
-3. 等待 30 秒（轮询周期），后端会自动处理
-4. 状态更新为 `Done`，结果字段显示：`✅ 已成功创建事件：团队会议`
-
-### 生成周报
-
-```
-指令: 生成本周工作总结报告
-状态: Pending
-```
-
-系统会自动：
-1. 从 Google Calendar 获取本周所有日程
-2. 从 Notion 获取本周完成的任务
-3. 使用 AI 生成结构化报告
-4. 创建新的 Notion 页面并保存报告
-5. 在结果字段返回页面链接
-
----
-
-## 🏗️ 架构概览（Notion MCP 版）
-
-```
-┌─────────────────────────────┐
-│   Notion Workspace          │
-│   • 指令中心 Database        │
-│   • 日程视图 Database        │
-│   • 报告归档 Database        │
-└────────────┬────────────────┘
-             │ Notion MCP Protocol
-             │ (Markdown-based)
-             ▼
-┌─────────────────────────────┐
-│   Backend Service           │
-│   • Notion MCP Client       │
-│   • AI Core (Task Parser)   │
-│   • Task Executor           │
-│   • Report Generator        │
-│   • Calendar Adapter        │
-└────────────┬────────────────┘
-             │
-             ▼
-┌─────────────────────────────┐
-│   External Services         │
-│   • Notion MCP Server       │
-│   • Google Calendar API     │
-│   • Anthropic Claude API    │
-└─────────────────────────────┘
-```
-
-**为什么使用双 MCP 架构（Notion + Google Calendar）？**
-- ✅ **Notion MCP**: Markdown 原生支持，AI 生成内容可直接写入，98% 代码减少
-- ✅ **Google Calendar MCP**: 自然语言时间解析（"明天下午3点"），60% 代码减少
-- ✅ **统一 OAuth 托管** - MCP Server 托管认证，零维护
-- ✅ **开放标准** - 生态兼容，长期稳定，未来可扩展更多 MCP 服务
-
-详细架构请参考 **[Notion & Google Calendar MCP 架构文档](./docs/ARCHITECTURE-MCP.md)** ⭐ **推荐**。
+**详细**: [完整架构文档](./docs/overview/architecture.md)
 
 ---
 
@@ -154,15 +70,14 @@ docker-compose logs -f backend
 
 | 层级 | 技术 |
 |------|------|
-| **后端框架** | Python 3.11 + FastAPI |
-| **AI/NLP** | LangChain + Anthropic Claude API |
-| **Notion 集成** | **Notion MCP (Model Context Protocol)** ⭐ |
-| **日历集成** | **Google Calendar MCP (Model Context Protocol)** ⭐ |
-| **数据库** | PostgreSQL 15 |
-| **缓存** | Redis 7 |
-| **任务队列** | Celery |
-| **容器化** | Docker + Docker Compose |
-| **外部集成** | Notion MCP Server, Google Calendar MCP Server |
+| 前端 | Notion Workspace |
+| 后端 | Python 3.11 + FastAPI |
+| AI | LangChain + Claude API |
+| 集成 | MCP (Notion + Google Calendar) |
+| 数据库 | PostgreSQL 15 + Redis 7 |
+| 部署 | Docker + Kubernetes |
+
+**详细**: [技术栈文档](./docs/overview/tech-stack.md)
 
 ---
 
@@ -170,156 +85,130 @@ docker-compose logs -f backend
 
 ```
 ailma-project/
-├── backend/               # 后端服务
-│   ├── api/              # FastAPI 路由
-│   ├── core/             # 核心业务逻辑
-│   │   ├── ai/           # AI 模块（Task Parser, Report Generator）
-│   │   └── executor.py   # 任务执行器
-│   ├── adapters/         # 外部服务适配器
-│   ├── listeners/        # Notion 监听器
-│   ├── models/           # 数据模型
-│   └── main.py           # 应用入口
-├── tests/                # 测试文件
-├── docs/                 # 文档
-│   ├── PRD.md           # 产品需求文档
-│   └── PROJECT-STRUCTURE.md
-├── docker-compose.yml    # Docker 编排
-├── requirements.txt      # Python 依赖
-└── README.md            # 本文件
-```
-
-完整结构说明：[PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md)
-
----
-
-## 🧪 开发
-
-### 安装开发依赖
-
-```bash
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-
-# 安装依赖
-pip install -r requirements-dev.txt
-```
-
-### 运行测试
-
-```bash
-# 运行所有测试
-pytest
-
-# 生成覆盖率报告
-pytest --cov=backend --cov-report=html
-```
-
-### 代码格式化
-
-```bash
-# 格式化代码
-black backend/
-isort backend/
-
-# 代码检查
-flake8 backend/
-mypy backend/
+├── docs/                  # 📚 模块化文档（30+ 小文档）
+│   ├── INDEX.md           # 总索引
+│   ├── overview/          # 产品概览
+│   ├── guides/            # 使用指南
+│   ├── integrations/      # 集成配置
+│   ├── features/          # 功能说明
+│   ├── deployment/        # 部署文档
+│   └── reference/         # 参考资料
+│
+├── backend/               # Python 后端代码
+│   ├── adapters/          # MCP 客户端
+│   ├── core/              # AI 核心
+│   └── api/               # REST API
+│
+├── tests/                 # 测试代码
+│   └── mcp_integration/   # MCP 集成测试
+│
+├── docker/                # Docker 配置
+├── .env.example           # 环境变量模板
+└── README.md              # 本文件
 ```
 
 ---
 
-## 📊 开发路线图
+## 🚀 5 分钟快速开始
 
-### Phase 1: MVP (4-6 周) ✅ 当前阶段
+### 1. 克隆项目
+```bash
+git clone https://github.com/your-org/ailma-project.git
+cd ailma-project
+```
 
-- [x] 项目初始化和架构设计
-- [ ] 数据库 Schema 和模型
-- [ ] Notion/Calendar 基础集成
-- [ ] AI 核心（Task Parser）
-- [ ] 日历事件 CRUD
-- [ ] 周报生成功能
+### 2. 配置环境变量
+```bash
+cp .env.example .env
+# 编辑 .env 填入你的 API Keys
+```
 
-### Phase 2: 功能完善 (6-8 周)
+### 3. 启动服务
+```bash
+docker-compose up -d
+```
 
-- [ ] Outlook Calendar 支持
-- [ ] 多日历账户管理
-- [ ] 月报和项目报告模板
-- [ ] 性能优化（缓存、异步）
-- [ ] 用户体验优化
+### 4. 测试连接
+```bash
+# 测试 Notion 连接
+python tests/mcp_integration/notion/test_connection.py
 
-### Phase 3: 生态扩展 (8-12 周)
+# 测试 Google Calendar 连接
+python tests/mcp_integration/google_calendar/test_connection.py
+```
 
-- [ ] Todoist 集成
-- [ ] Slack 通知
-- [ ] Trello/Asana 集成
-- [ ] 智能建议系统
-- [ ] 企业版功能
+### 5. 开始使用
+在 Notion "指令中心"输入指令，AILMA 自动执行！
 
-详细路线图：[PRD.md - 路线图](./docs/PRD.md#路线图)
+**详细步骤**: [完整快速开始指南](./docs/guides/quick-start.md)
 
 ---
 
-## 🤝 贡献指南
+## 💡 使用示例
 
-欢迎贡献代码、报告问题或提出建议！
+### 创建日历事件
+```
+# 在 Notion 输入
+"明天下午3点和产品团队开会"
 
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+# AILMA 自动创建
+✅ Google Calendar 事件
+✅ Notion 会议纪要页面
+✅ Google Meet 链接
+```
+
+### 生成工作报告
+```
+# 在 Notion 输入
+"生成本周工作报告"
+
+# AILMA 自动生成
+📊 包含会议统计、任务完成度、时间分析的 Markdown 报告
+```
+
+**更多示例**:
+- [Notion 使用示例](./docs/integrations/notion/examples.md)
+- [Google Calendar 使用示例](./docs/integrations/google-calendar/examples.md)
+
+---
+
+## 🤝 贡献
+
+我们欢迎贡献！请查看：
+- [贡献指南](./CONTRIBUTING.md)
+- [开发者指南](./docs/guides/developer-guide.md)
 
 ---
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+MIT License - 详见 [LICENSE](./LICENSE)
 
 ---
 
-## 📞 联系方式
+## 🔗 相关资源
 
-- **项目主页**: https://github.com/your-org/ailma-project
-- **问题反馈**: https://github.com/your-org/ailma-project/issues
-- **邮箱**: ailma-support@example.com
+### MCP 生态
+- [Notion MCP](https://github.com/pbohannon/notion-api-mcp)
+- [Google Calendar MCP](https://github.com/nspady/google-calendar-mcp)
+- [MCP 协议](https://modelcontextprotocol.io/)
 
----
-
-## 🙏 致谢
-
-感谢以下开源项目和服务：
-
+### API 文档
+- [Claude API](https://docs.anthropic.com/)
 - [FastAPI](https://fastapi.tiangolo.com/)
-- [LangChain](https://python.langchain.com/)
-- [Anthropic Claude](https://www.anthropic.com/)
-- [Notion MCP](https://developers.notion.com/docs/mcp)
-- [Model Context Protocol](http://blog.modelcontextprotocol.io/)
-- [Google Calendar API](https://developers.google.com/calendar)
+
+---
+
+## 📞 联系我们
+
+- 📧 Email: support@ailma.ai
+- 💬 Discord: [加入社区](https://discord.gg/ailma)
+- 🐛 Issues: [GitHub Issues](https://github.com/your-org/ailma-project/issues)
 
 ---
 
 **Built with ❤️ by the AILMA Team**
 
----
+**文档版本**: v2.0 (模块化架构)
+**最后更新**: 2025-11-27
 
-## 📚 相关资源
-
-### MCP 协议
-- [Model Context Protocol 规范](http://blog.modelcontextprotocol.io/)
-- [MCP 协议文档](https://modelcontextprotocol.io/)
-
-### Notion MCP
-- [Notion MCP 官方文档](https://developers.notion.com/docs/mcp)
-- [Python Notion MCP 实现](https://github.com/pbohannon/notion-api-mcp)
-
-### Google Calendar MCP
-- [nspady/google-calendar-mcp](https://github.com/nspady/google-calendar-mcp) - 功能最全面，推荐使用
-- [goldk3y/google-calendar-mcp](https://github.com/goldk3y/google-calendar-mcp) - 简洁稳定
-- [deciduus/calendar-mcp](https://github.com/deciduus/calendar-mcp) - Python 实现
-- [markelaugust74/mcp-google-calendar](https://github.com/markelaugust74/mcp-google-calendar) - Claude 集成
-
-### AI & 框架
-- [Claude API 文档](https://docs.anthropic.com/)
-- [FastAPI 教程](https://fastapi.tiangolo.com/tutorial/)
-- [LangChain 文档](https://python.langchain.com/)
