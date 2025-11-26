@@ -1,0 +1,18 @@
+# Notion MCP 测试最小依赖
+
+# Python 基础库
+python-dotenv==1.0.0
+
+# HTTP 客户端（用于 MCP 通信）
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Notion SDK (官方)
+notion-client==2.2.1
+
+# 可选：社区 MCP 实现
+# git+https://github.com/pbohannon/notion-api-mcp.git
+
+# 工具库
+pydantic==2.5.0
+pydantic-settings==2.1.0
