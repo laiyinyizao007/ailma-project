@@ -170,20 +170,24 @@ AI: "您有 3 个会议：
 
 ---
 
-### FR2: 日程管理功能
+### FR2: 日程管理功能（使用 Google Calendar MCP）
 
 #### FR2.1 日历读写与同步
 **优先级**: P0
 
 **功能描述**:
-- 连接用户的 Google Calendar 或 Outlook Calendar
+- 连接用户的 Google Calendar（通过 MCP 协议）
 - 实现双向同步（读取和写入）
-- 支持多日历账户管理
+- 支持多日历账户管理（primary、team、personal 等）
+- **MCP 特性**: 自然语言时间解析："明天下午3点" → ISO 8601
+- **MCP 特性**: 自动生成 Google Meet 会议链接
 
 **技术要求**:
-- 使用 OAuth 2.0 进行授权
+- 使用 Google Calendar MCP Server (社区实现)
+- OAuth 2.0 由 MCP Server 托管（零维护）
 - 支持增量同步（仅同步变更）
 - 冲突处理策略：优先保留用户手动修改
+- 自然语言时间处理：支持相对时间、模糊时间
 
 **同步规则**:
 ```

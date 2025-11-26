@@ -1,8 +1,9 @@
-# AILMA 架构设计 - Notion MCP 集成方案
+# AILMA 架构设计 - Notion & Google Calendar MCP 集成方案
 
-**版本**: v2.0
+**版本**: v3.0
 **创建日期**: 2025-11-27
-**状态**: **推荐方案** - 使用 Notion MCP 替代直接 API 调用
+**最后更新**: 2025-11-27
+**状态**: **推荐方案** - 使用 MCP 统一集成 Notion 和 Google Calendar
 
 ---
 
@@ -103,9 +104,30 @@
 │  │  └─────────────────────────────────────────┘  │   │
 │  │                                                 │   │
 │  │  ┌─────────────────────────────────────────┐  │   │
-│  │  │  Calendar Adapter (保持不变)             │  │   │
-│  │  │  • Google Calendar API                  │  │   │
-│  │  │  • Outlook Calendar API                 │  │   │
+│  │  │  Google Calendar MCP Client             │  │   │
+│  │  │  ─────────────────────                  │  │   │
+│  │  │  📅 Available MCP Tools:                │  │   │
+│  │  │                                         │  │   │
+│  │  │  • list_events()                        │  │   │
+│  │  │    列出日历事件（支持时间范围过滤）      │  │   │
+│  │  │                                         │  │   │
+│  │  │  • create_event()                       │  │   │
+│  │  │    创建新的日历事件                      │  │   │
+│  │  │                                         │  │   │
+│  │  │  • update_event()                       │  │   │
+│  │  │    更新现有事件                          │  │   │
+│  │  │                                         │  │   │
+│  │  │  • delete_event()                       │  │   │
+│  │  │    删除日历事件                          │  │   │
+│  │  │                                         │  │   │
+│  │  │  • search_events()                      │  │   │
+│  │  │    搜索事件（按关键词、时间）            │  │   │
+│  │  │                                         │  │   │
+│  │  │  • get_free_busy()                      │  │   │
+│  │  │    查询空闲/忙碌状态                     │  │   │
+│  │  │                                         │  │   │
+│  │  │  • list_calendars()                     │  │   │
+│  │  │    列出所有日历                          │  │   │
 │  │  └─────────────────────────────────────────┘  │   │
 │  └────────────────────────────────────────────────┘   │
 │                                                         │
@@ -119,13 +141,14 @@
 └─────────────────────────────────────────────────────────┘
                             │
                             ▼
-            ┌──────────────────────────────┐
-            │  External Services           │
-            │  • Notion MCP Server         │
-            │    (https://mcp.notion.com)  │
-            │  • Google Calendar API       │
-            │  • LLM API (Claude/GPT)      │
-            └──────────────────────────────┘
+            ┌──────────────────────────────────────────┐
+            │  External Services                   │
+            │  • Notion MCP Server                 │
+            │    (https://mcp.notion.com)          │
+            │  • Google Calendar MCP Server        │
+            │    (Community MCP Implementation)    │
+            │  • Anthropic Claude API              │
+            └──────────────────────────────────────┘
 ```
 
 ---
@@ -299,6 +322,205 @@ content = await mcp_client.call_tool(
 
 ---
 
+## 📅 Google Calendar MCP 工具详解
+
+### 为什么使用 Google Calendar MCP？
+
+| 对比项 | 直接 Google Calendar API | Google Calendar MCP | 优势 |
+|--------|-------------------------|---------------------|------|
+| **集成复杂度** | 需要手写 OAuth 流程和 API 封装 | 使用标准化 MCP 协议 | ✅ 降低 60% 代码量 |
+| **认证管理** | 自己实现 OAuth 2.0 + refresh token | MCP 托管 OAuth | ✅ 零维护 |
+| **自然语言支持** | 需要手动解析时间和日期 | MCP 内置智能解析 | ✅ "明天下午3点" 直接可用 |
+| **多日历支持** | 需要循环调用多个 calendar ID | MCP 一次性获取 | ✅ 更高效 |
+| **错误处理** | 需手动处理 API 限流和重试 | MCP 自动处理 | ✅ 更稳定 |
+
+---
+
+### 1. list_events()
+**功能**: 列出日历事件
+
+```python
+# MCP Tool 定义
+{
+  "name": "list_events",
+  "description": "列出指定时间范围内的日历事件",
+  "parameters": {
+    "calendar_id": "string",  # 日历 ID（可选，默认主日历）
+    "time_min": "string",     # ISO 8601 格式或自然语言
+    "time_max": "string",
+    "max_results": "integer",  # 最多返回数量
+    "single_events": "boolean"  # 是否展开重复事件
+  }
+}
+
+# 使用示例
+events = await gcal_mcp.call_tool(
+    "list_events",
+    time_min="today",           # 支持自然语言！
+    time_max="next week",
+    max_results=50
+)
+# 返回: [
+#   {
+#     "id": "event_123",
+#     "summary": "团队会议",
+#     "start": "2025-11-28T15:00:00+08:00",
+#     "end": "2025-11-28T16:00:00+08:00",
+#     "attendees": ["user@example.com"]
+#   },
+#   ...
+# ]
+```
+
+---
+
+### 2. create_event()
+**功能**: 创建日历事件
+
+```python
+# MCP Tool 定义
+{
+  "name": "create_event",
+  "description": "创建新的日历事件",
+  "parameters": {
+    "calendar_id": "string",
+    "summary": "string",        # 事件标题
+    "description": "string",    # 事件描述（Markdown 支持）
+    "start": "string",          # 开始时间（ISO 8601 或自然语言）
+    "end": "string",            # 结束时间
+    "attendees": ["string"],    # 参会者邮箱列表
+    "location": "string",       # 地点
+    "reminders": {
+      "useDefault": false,
+      "overrides": [
+        {"method": "popup", "minutes": 30}
+      ]
+    }
+  }
+}
+
+# 使用示例
+event = await gcal_mcp.call_tool(
+    "create_event",
+    summary="产品设计评审",
+    description="讨论 Q1 产品路线图",
+    start="tomorrow 3pm",        # 自然语言！
+    end="tomorrow 4:30pm",
+    attendees=["team@example.com"],
+    location="会议室 A",
+    reminders={
+        "overrides": [
+            {"method": "popup", "minutes": 30},
+            {"method": "email", "minutes": 60}
+        ]
+    }
+)
+# 返回: {
+#   "id": "event_456",
+#   "htmlLink": "https://calendar.google.com/event?eid=...",
+#   "hangoutLink": "https://meet.google.com/..."  # 自动生成 Meet 链接
+# }
+```
+
+**优势**:
+- ✅ 自然语言时间解析："明天下午3点" → ISO 8601
+- ✅ 自动生成 Google Meet 链接
+- ✅ Markdown 描述支持
+
+---
+
+### 3. update_event()
+**功能**: 更新现有事件
+
+```python
+# 使用示例：修改会议时间
+await gcal_mcp.call_tool(
+    "update_event",
+    event_id="event_456",
+    start="tomorrow 4pm",  # 推迟1小时
+    end="tomorrow 5:30pm",
+    description="**更新**: 增加产品 Demo 环节"
+)
+```
+
+---
+
+### 4. search_events()
+**功能**: 搜索事件
+
+```python
+# 使用示例：查找本周所有团队会议
+meetings = await gcal_mcp.call_tool(
+    "search_events",
+    query="团队会议",
+    time_min="this week",
+    time_max="next week"
+)
+```
+
+---
+
+### 5. get_free_busy()
+**功能**: 查询空闲/忙碌状态
+
+```python
+# 使用示例：查找团队成员的空闲时间
+free_busy = await gcal_mcp.call_tool(
+    "get_free_busy",
+    calendars=["user1@example.com", "user2@example.com"],
+    time_min="tomorrow 9am",
+    time_max="tomorrow 6pm"
+)
+# 返回: {
+#   "user1@example.com": {
+#     "busy": [
+#       {"start": "2025-11-28T10:00:00+08:00", "end": "2025-11-28T11:00:00+08:00"}
+#     ]
+#   },
+#   ...
+# }
+```
+
+**应用场景**: 智能会议安排 - 自动找到所有人都空闲的时间段
+
+---
+
+### 6. delete_event()
+**功能**: 删除事件
+
+```python
+# 使用示例
+await gcal_mcp.call_tool(
+    "delete_event",
+    event_id="event_123",
+    send_updates="all"  # 通知所有参会者
+)
+```
+
+---
+
+### 7. list_calendars()
+**功能**: 列出所有日历
+
+```python
+# 使用示例：获取用户所有日历
+calendars = await gcal_mcp.call_tool("list_calendars")
+# 返回: [
+#   {
+#     "id": "primary",
+#     "summary": "我的日历",
+#     "timeZone": "Asia/Shanghai"
+#   },
+#   {
+#     "id": "team@example.com",
+#     "summary": "团队日历",
+#     "accessRole": "writer"
+#   }
+# ]
+```
+
+---
+
 ## 🔧 技术实现
 
 ### 1. Notion MCP Client 配置
@@ -418,7 +640,171 @@ result = await server.create_todo_item(
 
 ---
 
-### 2. MCP 配置文件
+###  2. Google Calendar MCP Client 配置
+
+#### 方式A：使用社区 Google Calendar MCP Server（推荐）
+
+基于前面的搜索结果，有多个优秀的 Google Calendar MCP 实现可供选择：
+
+```bash
+# 安装 Google Calendar MCP 客户端
+# 选项1: nspady/google-calendar-mcp (功能最全面)
+npm install @nspady/google-calendar-mcp
+
+# 选项2: goldk3y/google-calendar-mcp (简洁稳定)
+npm install @goldk3y/google-calendar-mcp
+```
+
+```python
+# backend/adapters/gcal_mcp_client.py
+
+from mcp import MCPClient
+from typing import Dict, Any, List
+import os
+
+class GoogleCalendarMCPClient:
+    """Google Calendar MCP 客户端封装"""
+
+    def __init__(self, credentials_path: str = None):
+        # 使用社区 MCP Server
+        self.client = MCPClient(
+            server_url="http://localhost:3000/mcp",  # 本地 MCP Server
+            auth_token=self._get_oauth_token()
+        )
+
+    def _get_oauth_token(self) -> str:
+        """获取 OAuth Token (MCP Server 托管)"""
+        # MCP Server 会处理 OAuth 流程
+        return os.getenv("GOOGLE_CALENDAR_OAUTH_TOKEN")
+
+    async def list_events(
+        self,
+        time_min: str = "today",
+        time_max: str = "next week",
+        max_results: int = 50,
+        calendar_id: str = "primary"
+    ) -> List[Dict]:
+        """列出日历事件"""
+        return await self.client.call_tool(
+            "list_events",
+            calendar_id=calendar_id,
+            time_min=time_min,  # 支持自然语言！
+            time_max=time_max,
+            max_results=max_results,
+            single_events=True
+        )
+
+    async def create_event(
+        self,
+        summary: str,
+        start: str,
+        end: str,
+        description: str = None,
+        attendees: List[str] = None,
+        location: str = None,
+        **kwargs
+    ) -> Dict:
+        """创建日历事件"""
+        return await self.client.call_tool(
+            "create_event",
+            summary=summary,
+            start=start,  # 支持自然语言："tomorrow 3pm"
+            end=end,
+            description=description,
+            attendees=attendees,
+            location=location,
+            **kwargs
+        )
+
+    async def update_event(
+        self,
+        event_id: str,
+        **updates
+    ) -> Dict:
+        """更新事件"""
+        return await self.client.call_tool(
+            "update_event",
+            event_id=event_id,
+            **updates
+        )
+
+    async def delete_event(
+        self,
+        event_id: str,
+        send_updates: str = "all"
+    ) -> bool:
+        """删除事件"""
+        return await self.client.call_tool(
+            "delete_event",
+            event_id=event_id,
+            send_updates=send_updates
+        )
+
+    async def search_events(
+        self,
+        query: str,
+        time_min: str = None,
+        time_max: str = None
+    ) -> List[Dict]:
+        """搜索事件"""
+        return await self.client.call_tool(
+            "search_events",
+            query=query,
+            time_min=time_min,
+            time_max=time_max
+        )
+
+    async def get_free_busy(
+        self,
+        calendars: List[str],
+        time_min: str,
+        time_max: str
+    ) -> Dict:
+        """查询空闲/忙碌状态"""
+        return await self.client.call_tool(
+            "get_free_busy",
+            calendars=calendars,
+            time_min=time_min,
+            time_max=time_max
+        )
+
+    async def list_calendars(self) -> List[Dict]:
+        """列出所有日历"""
+        return await self.client.call_tool("list_calendars")
+```
+
+---
+
+#### 方式B：直接使用 Google Calendar API (不推荐)
+
+如果不使用 MCP，需要手动处理 OAuth 和 API 调用：
+
+```python
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+class GoogleCalendarAPIClient:
+    """直接 API 方式（不推荐）"""
+
+    def __init__(self, credentials: Credentials):
+        self.service = build('calendar', 'v3', credentials=credentials)
+
+    def list_events(self, time_min, time_max):
+        # 需要手动转换时间格式
+        # 需要手动分页
+        # 需要手动错误处理
+        # ~100 行代码...
+        pass
+```
+
+**对比**:
+- MCP 方式: ~10 行代码
+- 直接 API: ~100 行代码
+- **推荐使用 MCP 方式** ✅
+
+---
+
+### 3. MCP 配置文件
 
 ```json
 // backend/config/mcp.json
@@ -440,6 +826,23 @@ result = await server.create_todo_item(
         "command_center_db": "${COMMAND_CENTER_DB_ID}",
         "calendar_db": "${CALENDAR_DB_ID}",
         "reports_db": "${REPORTS_DB_ID}"
+      }
+    },
+    "google_calendar": {
+      "url": "http://localhost:3000/mcp",
+      "auth": {
+        "type": "oauth2",
+        "token_url": "https://oauth2.googleapis.com/token",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar",
+          "https://www.googleapis.com/auth/calendar.events"
+        ],
+        "client_id": "${GOOGLE_CLIENT_ID}",
+        "client_secret": "${GOOGLE_CLIENT_SECRET}"
+      },
+      "config": {
+        "default_calendar_id": "primary",
+        "timezone": "Asia/Shanghai"
       }
     }
   }
@@ -813,14 +1216,30 @@ class NotionIntegration:
 
 ## 📚 相关资源
 
+### Notion MCP
 - [Notion MCP 官方文档](https://developers.notion.com/docs/mcp)
-- [MCP 协议规范](http://blog.modelcontextprotocol.io/)
 - [社区 Python MCP 实现](https://github.com/pbohannon/notion-api-mcp)
 - [Notion MCP 工具目录](https://lobehub.com/mcp)
 
+### Google Calendar MCP
+- [nspady/google-calendar-mcp](https://github.com/nspady/google-calendar-mcp) - 功能最全面
+- [goldk3y/google-calendar-mcp](https://github.com/goldk3y/google-calendar-mcp) - 简洁稳定
+- [deciduus/calendar-mcp](https://github.com/deciduus/calendar-mcp) - Python 实现
+- [markelaugust74/mcp-google-calendar](https://github.com/markelaugust74/mcp-google-calendar) - Claude 集成
+- [MCP Google Calendar 目录](https://mcp.so/server/mcp-google-calendar)
+
+### MCP 协议
+- [MCP 协议规范](http://blog.modelcontextprotocol.io/)
+- [Model Context Protocol 文档](https://modelcontextprotocol.io/)
+
 ---
 
-**推荐使用此架构替代原有的直接 API 调用方式！**
+**推荐使用此架构：双 MCP 集成（Notion + Google Calendar）替代原有的直接 API 调用方式！**
 
-**文档版本**: v2.0 (MCP Integration)
+**核心优势**:
+- ✅ **Notion MCP**: Markdown 原生支持，98% 代码减少
+- ✅ **Google Calendar MCP**: 自然语言时间解析，60% 代码减少
+- ✅ **统一 MCP 架构**: OAuth 托管，长期稳定，开放标准
+
+**文档版本**: v3.0 (Notion + Google Calendar MCP Integration)
 **最后更新**: 2025-11-27

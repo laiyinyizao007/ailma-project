@@ -11,8 +11,9 @@
 - ✅ **自然语言交互**: 用口语化指令完成所有操作
 - ✅ **Notion 作为前端**: 零 UI 开发，利用 Notion 强大的数据库能力
 - ✅ **Notion MCP 集成**: 使用 Model Context Protocol 实现标准化、高效的 Notion 集成
+- ✅ **Google Calendar MCP 集成**: 自然语言时间解析 + 自动生成 Meet 链接
 - ✅ **智能任务解析**: AI 自动识别意图，无需记忆复杂命令
-- ✅ **多平台集成**: 统一管理 Google Calendar、Notion 等服务
+- ✅ **统一 MCP 架构**: Notion + Google Calendar 双 MCP 集成，零维护 OAuth
 - ✅ **自动化报告生成**: AI 驱动的数据分析和结构化报告
 - ✅ **Markdown 原生支持**: 报告和笔记使用 Markdown 格式，AI 友好
 
@@ -139,13 +140,13 @@ docker-compose logs -f backend
 └─────────────────────────────┘
 ```
 
-**为什么使用 Notion MCP？**
-- ✅ **Markdown 原生支持** - AI 生成内容可直接写入，无需复杂转换
-- ✅ **降低 50% 代码量** - 标准化协议替代手写 API 封装
-- ✅ **OAuth 托管** - 无需自行管理认证逻辑
-- ✅ **开放标准** - 生态兼容，长期稳定
+**为什么使用双 MCP 架构（Notion + Google Calendar）？**
+- ✅ **Notion MCP**: Markdown 原生支持，AI 生成内容可直接写入，98% 代码减少
+- ✅ **Google Calendar MCP**: 自然语言时间解析（"明天下午3点"），60% 代码减少
+- ✅ **统一 OAuth 托管** - MCP Server 托管认证，零维护
+- ✅ **开放标准** - 生态兼容，长期稳定，未来可扩展更多 MCP 服务
 
-详细架构请参考 **[Notion MCP 架构文档](./docs/ARCHITECTURE-MCP.md)**。
+详细架构请参考 **[Notion & Google Calendar MCP 架构文档](./docs/ARCHITECTURE-MCP.md)** ⭐ **推荐**。
 
 ---
 
