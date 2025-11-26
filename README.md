@@ -157,11 +157,12 @@ docker-compose logs -f backend
 | **后端框架** | Python 3.11 + FastAPI |
 | **AI/NLP** | LangChain + Anthropic Claude API |
 | **Notion 集成** | **Notion MCP (Model Context Protocol)** ⭐ |
+| **日历集成** | **Google Calendar MCP (Model Context Protocol)** ⭐ |
 | **数据库** | PostgreSQL 15 |
 | **缓存** | Redis 7 |
 | **任务队列** | Celery |
 | **容器化** | Docker + Docker Compose |
-| **外部集成** | Notion MCP Server, Google Calendar API |
+| **外部集成** | Notion MCP Server, Google Calendar MCP Server |
 
 ---
 
@@ -304,9 +305,21 @@ mypy backend/
 
 ## 📚 相关资源
 
-- [Notion MCP 官方文档](https://developers.notion.com/docs/mcp)
+### MCP 协议
 - [Model Context Protocol 规范](http://blog.modelcontextprotocol.io/)
-- [Google Calendar API 指南](https://developers.google.com/calendar/api/guides/overview)
+- [MCP 协议文档](https://modelcontextprotocol.io/)
+
+### Notion MCP
+- [Notion MCP 官方文档](https://developers.notion.com/docs/mcp)
+- [Python Notion MCP 实现](https://github.com/pbohannon/notion-api-mcp)
+
+### Google Calendar MCP
+- [nspady/google-calendar-mcp](https://github.com/nspady/google-calendar-mcp) - 功能最全面，推荐使用
+- [goldk3y/google-calendar-mcp](https://github.com/goldk3y/google-calendar-mcp) - 简洁稳定
+- [deciduus/calendar-mcp](https://github.com/deciduus/calendar-mcp) - Python 实现
+- [markelaugust74/mcp-google-calendar](https://github.com/markelaugust74/mcp-google-calendar) - Claude 集成
+
+### AI & 框架
 - [Claude API 文档](https://docs.anthropic.com/)
 - [FastAPI 教程](https://fastapi.tiangolo.com/tutorial/)
-- [Python Notion MCP 实现](https://github.com/pbohannon/notion-api-mcp)
+- [LangChain 文档](https://python.langchain.com/)
