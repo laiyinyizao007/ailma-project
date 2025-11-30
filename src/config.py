@@ -18,9 +18,17 @@ class Settings(BaseSettings):
     reports_db_id: str = "test_reports_id"
     notion_mcp_server_url: str = "https://mcp.notion.com/mcp"
 
+    # LLM 配置
+    llm_provider: str = "openai"  # "openai" 或 "claude"
+
     # Claude API 配置
     anthropic_api_key: str = "test_anthropic_key"
-    llm_model: str = "claude-3-sonnet-20240229"
+
+    # OpenAI API 配置
+    openai_api_key: str = "test_openai_key"
+
+    # 模型配置 (根据 provider 自动选择)
+    llm_model: str = "gpt-4o-mini"  # OpenAI: gpt-4o-mini, gpt-4o; Claude: claude-3-sonnet-20240229
 
     # Google Calendar 配置
     google_calendar_mcp_server_url: str = "http://localhost:3000/mcp"

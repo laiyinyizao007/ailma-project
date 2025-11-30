@@ -6,6 +6,7 @@ pydantic-settings>=2.1.0
 
 # AI & NLP
 anthropic>=0.18.0
+openai>=1.0.0  # OpenAI API 客户端
 langchain>=0.1.0
 python-dateutil>=2.8.2
 
