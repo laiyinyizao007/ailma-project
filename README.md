@@ -1,6 +1,11 @@
 # AILMA - AI 智能生活管理助手
 
-**用自然语言管理你的日历和笔记**
+**AI Life Management Assistant** - 在 Notion 中用自然语言管理你的生活
+
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109%2B-009688.svg)](https://fastapi.tiangolo.com/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ---
 
@@ -94,15 +99,24 @@ ailma-project/
 │   ├── deployment/        # 部署文档
 │   └── reference/         # 参考资料
 │
-├── backend/               # Python 后端代码
-│   ├── adapters/          # MCP 客户端
-│   ├── core/              # AI 核心
-│   └── api/               # REST API
+├── src/                   # 源代码
+│   ├── ai/                # AI 核心
+│   │   ├── classifiers/   # 意图分类
+│   │   ├── extractors/    # 实体提取
+│   │   └── parsers/       # 时间解析
+│   ├── adapters/          # MCP 适配器
+│   ├── executors/         # 执行器
+│   ├── listeners/         # 后台监听器
+│   └── main.py            # 主应用
 │
 ├── tests/                 # 测试代码
-│   └── mcp_integration/   # MCP 集成测试
+│   ├── ai/                # AI 单元测试
+│   ├── integration/       # 集成测试
+│   └── e2e/               # E2E 测试
 │
-├── docker/                # Docker 配置
+├── tasks/                 # 任务拆解（124 步骤）
+├── Dockerfile             # Docker 配置
+├── docker-compose.yml     # 服务编排
 ├── .env.example           # 环境变量模板
 └── README.md              # 本文件
 ```
