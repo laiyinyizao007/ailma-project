@@ -67,20 +67,22 @@ echo ""
 # 测试 API 连接
 echo -e "${BLUE}🔍 测试 OpenAI API 连接...${NC}"
 
-# 创建测试脚本
+# 创建测试脚本 (使用新版 OpenAI API)
 cat > /tmp/test_openai.py << 'EOF'
 import os
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI, AuthenticationError
 
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = api_key
 
 try:
+    # 创建客户端 (新版 API)
+    client = OpenAI(api_key=api_key)
+
     # 简单的 API 测试
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": "Say 'OK' if you can hear me"}],
         max_tokens=10
@@ -89,7 +91,7 @@ try:
     print("✅ OpenAI API 连接成功！")
     print(f"响应: {response.choices[0].message.content}")
     exit(0)
-except openai.AuthenticationError:
+except AuthenticationError:
     print("❌ API Key 无效")
     exit(1)
 except Exception as e:

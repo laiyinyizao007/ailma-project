@@ -26,6 +26,7 @@ class Settings(BaseSettings):
 
     # OpenAI API 配置
     openai_api_key: str = "test_openai_key"
+    openai_base_url: Optional[str] = None  # 自定义 API endpoint (用于代理服务)
 
     # 模型配置 (根据 provider 自动选择)
     llm_model: str = "gpt-4o-mini"  # OpenAI: gpt-4o-mini, gpt-4o; Claude: claude-3-sonnet-20240229

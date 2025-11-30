@@ -37,12 +37,22 @@ def retry_on_rate_limit(max_retries: int = 3):
 class OpenAIClient:
     """OpenAI API 客户端封装"""
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        base_url: Optional[str] = None,
+    ):
         self.api_key = api_key or settings.openai_api_key
-        self.model = model or settings.llm_model or "gpt-4o-mini"  # 默认使用 gpt-4o-mini (便宜且快)
+        self.model = model or settings.llm_model or "gpt-4o-mini"
+        self.base_url = base_url or settings.openai_base_url
 
         # 初始化 OpenAI 客户端 (新版 API)
-        self.client = AsyncOpenAI(api_key=self.api_key)
+        # 如果提供了 base_url，使用自定义 endpoint (用于代理服务)
+        if self.base_url:
+            self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
+        else:
+            self.client = AsyncOpenAI(api_key=self.api_key)
 
     @retry_on_rate_limit(max_retries=3)
     async def complete(
